@@ -1,51 +1,47 @@
 'use strict';
 
-// var Component = React.createClass({
-// 	render: function() {
-// 	return React.DOM.span(null, "I'm so custom");
-// }
-// });
+const logMixins = {
+	_log: function(methodName, args) {
+		console.log(this.name + '::' + methodName, args);
+	},
 
-// ReactDOM.render(
-// 	React.createElement(Component),
-// 	document.getElementById("app")
-// );
+	componentWillUpdate: function() {
+		this._log('componentWillUpdate', arguments);
+	},
 
+	componentDidUpdate: function() {
+		this._log('componentDidUpdate', arguments);
+	},
 
+	componentWillMount: function() {
+		this._log('componentWillMount', arguments);
+	},
 
-// const HiMan = React.createClass({
-// 	displayName: "Hi, how are you man",
-// 	render: function() {
-// 		return (
-// 			<div>
-// 				<h1>I wait for you</h1>
-// 				<p>Where have you been?</p>
-// 			</div>
-// 		);
-// 	}
-// });
+	componentDidMount: function() {
+		this._log('componentDidMount', arguments);
+	},
 
-// ReactDOM.render(
-// 	<HiMan />, document.getElementById('app')
-// );
+	componentWillUnmount: function() {
+		this._log('componentWillUnmount', arguments);
+	}
+};
 
-
-// var Component = React.createClass({
-// 	render: function() {
-// 		console.log(this);
-// 		return React.DOM.span(null, "My name is " +
-// 		this.props.name);
-// 	}
-// });
-
-// ReactDOM.render(
-// 	React.createElement(Component, {
-// 		name: "Bob",
-// 	}),
-// 	document.getElementById("app")
-// );
+const Counter = React.createClass({
+	name: 'Counter',
+	// mixins: [logMixins],
+	propTypes: {
+		count: React.PropTypes.number.isRequired,
+	},
+	render: function() {
+		console.log(this.name = '::render()');
+		return React.DOM.span(null, this.props.count);
+	}
+});
 
 const TextAreaCounter = React.createClass({
+	name: 'TextAreaCounter',
+	// mixins: [logMixins],
+
 	propTypes: {
 		defaultValue: React.PropTypes.string,
 		text: React.PropTypes.string,
@@ -57,6 +53,10 @@ const TextAreaCounter = React.createClass({
 		};
 	},
 
+	// shouldComponentUpdate(nextProps, nextState_ignore) {
+	// 	return nextProps.count !== this.props.count;
+	// },
+
 	getInitialState: function() {
 		return {
 			text: this.props.defaultValue,
@@ -65,18 +65,29 @@ const TextAreaCounter = React.createClass({
 	},
 
 	_textChange: function(ev) {
-		this.setState({
+		this.setState({shouldComponentUpdate(nextProps, nextState_ignore) {
+return nextProps.count !== this.props.count;
+},
 			text: ev.target.value,
 		});
 	},
 
   render: function() {
+  	console.log(this.name = '::render()');
+  	let counter = null;
+  	if (this.state.text.length > 0) {
+  		counter = React.DOM.h3(null, 
+  			React.createElement(Counter, {
+  				count: this.state.text.length,
+  			})
+  		);
+  	}
   	return React.DOM.div(null, 
   		React.DOM.textarea({
   			defaultValue: this.state.text,
   			onChange: this._textChange,
   		}),
-  		React.DOM.h3(null, this.state.text.length)
+  		counter
   	);
   }
 });
